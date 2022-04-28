@@ -42,21 +42,24 @@ router.post("/create", async (req, res) => {
     name,
     clients: new Map(),
     last_modified: Date.now(),
-    // throttledUpdate: throttle(()=>{
-    //     var converter = new QuillDeltaToHtmlConverter(clients.get(uid).doc.data.ops, {}); // get doc text upon throttle
-    //     text = convert.convert().replace(/<[^>]*>?/gm, ''); // remove HTML tags
-    //     console.log("throttle went!")
-    //     console.log(text)
-    //     elastic.update({
-    //       index: 'cse356',
-    //       id: docid,
-    //       script: {
-    //         lang: 'painless',
-    //         source: 'ctx._source.text =  params.text',
-    //         params: { text: text }
-    //       }
-    //     })
-    //   }, 1000, { 'trailing': false })
+    throttledUpdate: throttle(()=>{
+      console.log('in throttle')
+      doc.fetch(()=>{
+        var converter = new QuillDeltaToHtmlConverter(doc.data.ops, {}); // get doc text upon throttle
+        console.log(converter.convert())
+        console.log(doc.data)
+        elastic.update({
+        index: 'cse356',
+        id: docid,
+        script: {
+          lang: 'painless',
+          source: 'ctx._source.text =  params.text; ctx._source.suggest = params.text',
+          params: { text: converter.convert().replace(/<[^>]*>?/gm, '') }
+        }
+          })
+        }, 1000, { 'trailing': false })
+      })
+      
   })
   return res.status(200).json({ status: "OK" });
 });

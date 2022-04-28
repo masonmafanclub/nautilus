@@ -79,16 +79,18 @@ router.post("/op/:docid/:uid", function (req, res, next) {
     doc.submitOp(op, (err)=>{
       if (err){ console.log(err)}
       else{
-        var converter = new QuillDeltaToHtmlConverter(doc.data.ops, {}); // get doc text upon throttle
-        elastic.update({
-          index: 'cse356',
-          id: docid,
-          script: {
-            lang: 'painless',
-            source: 'ctx._source.text =  params.text; ctx._source.suggest = params.text',
-            params: { text: converter.convert().replace(/<[^>]*>?/gm, '') }
-          }
-        })
+        // var converter = new QuillDeltaToHtmlConverter(doc.data.ops, {}); // get doc text upon throttle
+        // elastic.update({
+        //   index: 'cse356',
+        //   id: docid,
+        //   script: {
+        //     lang: 'painless',
+        //     source: 'ctx._source.text =  params.text; ctx._source.suggest = params.text',
+        //     params: { text: converter.convert().replace(/<[^>]*>?/gm, '') }
+        //   }
+        // })
+        docs.get(docid).throttledUpdate()
+
       }
     });
     res.json({ status: "ok" });
