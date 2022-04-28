@@ -18,4 +18,12 @@ export const elastic = new Client({
     apiKey: process.env.ENCODED_API_KEY
   }
 })
+elastic.deleteByQuery({
+  index: "cse356",
+  body: {
+    query: {
+      match_all: {}
+    }
+  }
+})
 
