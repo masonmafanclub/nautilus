@@ -85,7 +85,7 @@ router.post("/op/:docid/:uid", function (req, res, next) {
           id: docid,
           script: {
             lang: 'painless',
-            source: 'ctx._source.text =  params.text',
+            source: 'ctx._source.text =  params.text; ctx._source.suggest = params.text',
             params: { text: converter.convert().replace(/<[^>]*>?/gm, '') }
           }
         })

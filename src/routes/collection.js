@@ -33,7 +33,8 @@ router.post("/create", async (req, res) => {
     id: docid,
     document: {
       name: name,
-      text: ""
+      text: "",
+      suggest: ""
     }
   })
   docs.set(docid, {
