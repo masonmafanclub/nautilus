@@ -3,6 +3,7 @@ import session from "express-session";
 
 import collectionRouter from "./routes/collection";
 import docRouter from "./routes/doc";
+import indexRouter from "./routes/index";
 
 var app = express();
 app.use(express.json());
@@ -16,5 +17,6 @@ app.use(function (req, res, next) {
 
 app.use("/collection", collectionRouter);
 app.use("/doc", docRouter);
+app.use("/index", indexRouter);
 
 export default app;

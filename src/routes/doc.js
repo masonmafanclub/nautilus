@@ -1,6 +1,5 @@
 import express from "express";
-
-import { backend, docs } from "../sharedb";
+import { backend, docs, elastic } from "../sharedb";
 const router = express.Router();
 
 var QuillDeltaToHtmlConverter =
@@ -22,7 +21,7 @@ router.get("/connect/:docid/:uid", function (req, res, next) {
   res.writeHead(200, headers);
   res.flushHeaders();
 
-  const { version, clients } = docs.get(docid);
+  const { version, clients, throttledUpdate } = docs.get(docid);
 
   if (!clients.has(uid)) {
     clients.set(uid, {
@@ -77,7 +76,21 @@ router.post("/op/:docid/:uid", function (req, res, next) {
   if (docversion.equals(version)) {
     docversion.inc();
     docs.get(docid).last_modified = Date.now();
-    doc.submitOp(op);
+    doc.submitOp(op, (err)=>{
+      if (err){ console.log(err)}
+      else{
+        var converter = new QuillDeltaToHtmlConverter(doc.data.ops, {}); // get doc text upon throttle
+        elastic.update({
+          index: 'cse356',
+          id: docid,
+          script: {
+            lang: 'painless',
+            source: 'ctx._source.text =  params.text',
+            params: { text: converter.convert().replace(/<[^>]*>?/gm, '') }
+          }
+        })
+      }
+    });
     res.json({ status: "ok" });
   } else {
     res.json({ status: "retry" });
