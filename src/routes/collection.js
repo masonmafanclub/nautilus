@@ -1,12 +1,13 @@
 import express from "express";
 import crypto from "crypto";
-import throttle from 'lodash/throttle';
+import throttle from "lodash/throttle";
 import { backend, docs, elastic } from "../sharedb";
-const router = express.Router();
 
 var QuillDeltaToHtmlConverter =
   require("quill-delta-to-html").QuillDeltaToHtmlConverter;
-  
+
+const router = express.Router();
+
 // fancy wrapper around integer
 class Version {
   constructor() {
@@ -29,38 +30,42 @@ router.post("/create", async (req, res) => {
   var doc = backend.connect().get("document", docid);
   doc.create([], "rich-text");
   elastic.index({
-    index: 'cse356',
+    index: "cse356",
     id: docid,
     document: {
       name: name,
       text: "",
-      suggest: ""
-    }
-  })
+      suggest: "",
+    },
+  });
   docs.set(docid, {
     version: new Version(),
     name,
     clients: new Map(),
     last_modified: Date.now(),
-    throttledUpdate: throttle(()=>{
-      console.log('in throttle')
-      doc.fetch(()=>{
-        var converter = new QuillDeltaToHtmlConverter(doc.data.ops, {}); // get doc text upon throttle
-        console.log(converter.convert())
-        console.log(doc.data)
-        elastic.update({
-        index: 'cse356',
-        id: docid,
-        script: {
-          lang: 'painless',
-          source: 'ctx._source.text =  params.text; ctx._source.suggest = params.text',
-          params: { text: converter.convert().replace(/<[^>]*>?/gm, '') }
-        }
-          })
-        }, 1000, { 'trailing': false })
-      })
-      
-  })
+    throttledUpdate: throttle(
+      () => {
+        console.log("in throttle");
+        doc.fetch(() => {
+          var converter = new QuillDeltaToHtmlConverter(doc.data.ops, {}); // get doc text upon throttle
+          console.log(converter.convert());
+          console.log(doc.data);
+          elastic.update({
+            index: "cse356",
+            id: docid,
+            script: {
+              lang: "painless",
+              source:
+                "ctx._source.text =  params.text; ctx._source.suggest = params.text",
+              params: { text: converter.convert().replace(/<[^>]*>?/gm, "") },
+            },
+          });
+        });
+      },
+      1000,
+      { trailing: false }
+    ),
+  });
   return res.status(200).json({ status: "OK" });
 });
 
@@ -76,7 +81,7 @@ router.post("/delete", (req, res) => {
   doc.destroy();
 
   docs.delete(docid);
-  elastic.delete({ index: 'cse356', id: docid});
+  elastic.delete({ index: "cse356", id: docid });
   return res.status(200).json({ status: "OK" });
 });
 

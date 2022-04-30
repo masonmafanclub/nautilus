@@ -2,66 +2,60 @@ import express from "express";
 import { elastic } from "../sharedb";
 const router = express.Router();
 
-
 router.get("/search", async (req, res) => {
-  
   const result = await elastic.search({
-    index: 'cse356',
+    index: "cse356",
     query: {
       multi_match: {
         query: req.query.q,
-        type: "phrase", 
-        fields: ["name^2", "text"] 
-      }
+        type: "phrase",
+        fields: ["name^2", "text"],
+      },
     },
     highlight: {
       fields: {
-        text: {}
+        text: {},
       },
       no_match_size: 100,
-      number_of_fragments: 1
-    }
-    
-    
-  })
-  if (result.hits.hits){
-     const output = result.hits.hits.map((hit)=>({
-    docid: hit._id,
-    name: hit._source.name,
-    snippet: hit.highlight.text
-     }))
+      number_of_fragments: 1,
+    },
+  });
+  if (result.hits.hits) {
+    const output = result.hits.hits.map((hit) => ({
+      docid: hit._id,
+      name: hit._source.name,
+      snippet: hit.highlight.text,
+    }));
     return res.status(200).json(output);
-  
-  }
-  else{
+  } else {
     return res.status(400).json({ status: "hit nothing" });
   }
- 
-
-  
 });
 // may fail for edit distance greater than 2
 router.get("/suggest", async (req, res) => {
-  
   const result = await elastic.search({
-    index: 'cse356',
+    index: "cse356",
     suggest: {
       suggestion: {
         text: req.query.q,
         term: {
           field: "suggest",
-          prefix_length: req.query.q.length
-        }
-      }
-    }
-  })
-  console.log(result.suggest)
-  if(result.suggest.suggestion.length >0 && result.suggest.suggestion[0].options.length>0){
-    const output = result.suggest.suggestion[0].options.map((option)=>(option.text))
+          prefix_length: req.query.q.length,
+        },
+      },
+    },
+  });
+  console.log(result.suggest);
+  if (
+    result.suggest.suggestion.length > 0 &&
+    result.suggest.suggestion[0].options.length > 0
+  ) {
+    const output = result.suggest.suggestion[0].options.map(
+      (option) => option.text
+    );
     return res.status(200).json(output);
-  }
-  else{
-     return res.status(400).json({ status: "no suggestions" });
+  } else {
+    return res.status(400).json({ status: "no suggestions" });
   }
 });
 
