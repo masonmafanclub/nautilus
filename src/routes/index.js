@@ -28,7 +28,8 @@ router.get("/search", async (req, res) => {
     }));
     return res.status(200).json(output);
   } else {
-    return res.status(400).json({ status: "hit nothing" });
+    return res.status(200).json([]);
+    // return res.status(400).json({ status: "hit nothing" });
   }
 });
 // may fail for edit distance greater than 2
@@ -55,7 +56,8 @@ router.get("/suggest", async (req, res) => {
     );
     return res.status(200).json(output);
   } else {
-    return res.status(400).json({ status: "no suggestions" });
+    return res.status(200).json([]);
+    // return res.status(400).json({ status: "no suggestions" });
   }
 });
 
