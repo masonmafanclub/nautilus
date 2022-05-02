@@ -41,7 +41,7 @@ router.post("/create", async (req, res) => {
       suggest: "",
     },
   });
-  const version = new Version()
+  const version = new Version();
   docs.set(docid, {
     version,
     name,
@@ -49,10 +49,18 @@ router.post("/create", async (req, res) => {
     last_modified: Date.now(),
     throttledUpdate: debounce(
       () => {
-        console.log("Throttling, updating document, docid:", docid, " next version:", version.getVal());
+        console.log(
+          "Throttling, updating document, docid:",
+          docid,
+          " next version:",
+          version.getVal()
+        );
         doc.fetch(() => {
           var converter = new QuillDeltaToHtmlConverter(doc.data.ops, {}); // get doc text upon throttle
-          console.log("Updating elastic with text: ", converter.convert().replace(/<[^>]*>?/gm, ""));
+          console.log(
+            "Updating elastic with text: ",
+            converter.convert().replace(/<[^>]*>?/gm, "")
+          );
           elastic.update({
             index: "cse356",
             id: docid,
