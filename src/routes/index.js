@@ -18,6 +18,7 @@ router.get("/search", async (req, res) => {
       },
       no_match_size: 100,
       number_of_fragments: 1,
+      fragment_size: 250,
     },
   });
   if (result.hits.hits) {

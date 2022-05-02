@@ -1,6 +1,6 @@
 import express from "express";
 import crypto from "crypto";
-import throttle from "lodash/throttle";
+import debounce from "lodash/debounce";
 import { backend, docs, elastic } from "../sharedb";
 
 var QuillDeltaToHtmlConverter =
@@ -43,7 +43,7 @@ router.post("/create", async (req, res) => {
     name,
     clients: new Map(),
     last_modified: Date.now(),
-    throttledUpdate: throttle(
+    throttledUpdate: debounce(
       () => {
         console.log("in throttle");
         doc.fetch(() => {
@@ -63,7 +63,7 @@ router.post("/create", async (req, res) => {
         });
       },
       1000,
-      { trailing: false }
+      { maxWait: 1000 }
     ),
   });
   return res.status(200).json({ status: "OK" });
