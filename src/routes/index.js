@@ -25,7 +25,7 @@ router.get("/search", async (req, res) => {
     const output = result.hits.hits.map((hit) => ({
       docid: hit._id,
       name: hit._source.name,
-      snippet: hit.highlight.text,
+      snippet: hit.highlight.text[0],
     }));
     return res.status(200).json(output);
   } else {
