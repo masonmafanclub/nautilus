@@ -19,6 +19,9 @@ class Version {
   inc() {
     this.val++;
   }
+  getVal() {
+    return this.val;
+  }
 }
 
 // create
@@ -38,18 +41,18 @@ router.post("/create", async (req, res) => {
       suggest: "",
     },
   });
+  const version = new Version()
   docs.set(docid, {
-    version: new Version(),
+    version,
     name,
     clients: new Map(),
     last_modified: Date.now(),
     throttledUpdate: debounce(
       () => {
-        console.log("in throttle");
+        console.log("Throttling, updating document, docid:", docid, " next version:", version.getVal());
         doc.fetch(() => {
           var converter = new QuillDeltaToHtmlConverter(doc.data.ops, {}); // get doc text upon throttle
-          console.log(converter.convert());
-          console.log(doc.data);
+          console.log("Updating elastic with text: ", converter.convert().replace(/<[^>]*>?/gm, ""));
           elastic.update({
             index: "cse356",
             id: docid,
