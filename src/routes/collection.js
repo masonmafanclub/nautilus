@@ -57,10 +57,10 @@ router.post("/create", async (req, res) => {
         );
         doc.fetch(() => {
           var converter = new QuillDeltaToHtmlConverter(doc.data.ops, {}); // get doc text upon throttle
-          console.log(
-            "Updating elastic with text: ",
-            converter.convert().replace(/<[^>]*>?/gm, "")
-          );
+          // console.log(
+          //   "Updating elastic with text: ",
+          //   converter.convert().replace(/<[^>]*>?/gm, "")
+          // );
           elastic.update({
             index: "cse356",
             id: docid,

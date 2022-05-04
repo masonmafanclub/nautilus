@@ -48,7 +48,7 @@ router.get("/suggest", async (req, res) => {
       },
     },
   });
-  console.log(result.suggest);
+  // console.log(result.suggest);
   if (
     result.suggest.suggestion.length > 0 &&
     result.suggest.suggestion[0].options.length > 0
